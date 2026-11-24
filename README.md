@@ -67,3 +67,4 @@ export OTEL_RESOURCE_ATTRIBUTES="project=my-repo"     # optional; shows in the P
 
 Limits compared with the plugin: no content capture beyond what Claude Code itself logs, project is `unknown` unless set via `OTEL_RESOURCE_ATTRIBUTES`, and the user is `user.email` or `user.id` from the events. Do not run both the plugin and OTLP for the same sessions: they use different span ids, so usage would be counted twice.
 # claude-monitor
+# claude-monitor
