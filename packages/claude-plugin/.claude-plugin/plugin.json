@@ -1,0 +1,9 @@
+{
+  "name": "claude-code-telemetry-monitor",
+  "version": "1.0.0",
+  "description": "Streams Claude Code sessions, turns, LLM token usage and tool executions as spans to a self-hosted monitoring platform, without blocking the CLI.",
+  "author": {
+    "name": "OneAssist Engineering"
+  },
+  "license": "MIT"
+}

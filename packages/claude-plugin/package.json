@@ -1,0 +1,13 @@
+{
+  "name": "claude-code-telemetry-monitor",
+  "version": "1.0.0",
+  "description": "Claude Code plugin that streams session/turn/LLM/tool spans to a self-hosted telemetry platform.",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test test/"
+  }
+}

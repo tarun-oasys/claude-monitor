@@ -1,0 +1,13 @@
+{
+  "name": "claude-monitor",
+  "owner": {
+    "name": "OneAssist Engineering"
+  },
+  "plugins": [
+    {
+      "name": "claude-code-telemetry-monitor",
+      "source": "./packages/claude-plugin",
+      "description": "Streams Claude Code sessions, turns, token usage and tool executions to a self-hosted monitoring platform."
+    }
+  ]
+}

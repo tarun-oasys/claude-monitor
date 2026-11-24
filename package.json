@@ -1,0 +1,20 @@
+{
+  "name": "claude-monitor",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Self-hosted Claude Code observability and cost monitoring",
+  "workspaces": [
+    "packages/claude-plugin",
+    "packages/platform"
+  ],
+  "scripts": {
+    "test": "npm test --workspaces --if-present",
+    "build": "npm run build -w claude-monitor-platform",
+    "start": "npm start -w claude-monitor-platform",
+    "dev:server": "npm run dev:server -w claude-monitor-platform",
+    "dev:dashboard": "npm run dev:dashboard -w claude-monitor-platform"
+  },
+  "engines": {
+    "node": ">=18.17"
+  }
+}
