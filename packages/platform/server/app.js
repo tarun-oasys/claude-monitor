@@ -4,6 +4,7 @@ import path from 'node:path';
 import express from 'express';
 import { makeUpserter } from './db.js';
 import { ingestSpans, MAX_BATCH } from './ingest.js';
+import { syncTranscripts } from './transcripts.js';
 import { decodeLogsProtobuf, logsToSpans } from './otlp.js';
 import { listProjects, listSessions, overview, parseRange, sessionDetail } from './queries.js';
 
@@ -29,7 +30,7 @@ function requireKey(expected) {
 /**
  * @param {{ db: import('better-sqlite3').Database, pricing: object[], ingestKey?: string, dashboardKey?: string, staticDir?: string }} deps
  */
-export function createApp({ db, pricing, ingestKey = '', dashboardKey = '', staticDir }) {
+export function createApp({ db, pricing, ingestKey = '', dashboardKey = '', staticDir, transcriptDir = '', transcriptDays = 30 }) {
   const app = express();
   const upsert = makeUpserter(db);
 
@@ -86,8 +87,35 @@ export function createApp({ db, pricing, ingestKey = '', dashboardKey = '', stat
   app.post('/v1/metrics', ingestAuth, ...otlpBody, otlpAck);
   app.post('/v1/traces', ingestAuth, ...otlpBody, otlpAck);
 
+  // Optional: import local Claude Code transcripts whenever the dashboard asks for data, so a
+  // page refresh shows new sessions. Concurrent requests share one pass; passes are at most
+  // ~1.5s apart and only re-read files that changed.
+  const transcriptState = { seen: new Map() };
+  let syncing = null;
+  let lastSync = 0;
+  const refreshTranscripts = () => {
+    if (!transcriptDir) return null;
+    if (syncing) return syncing;
+    if (Date.now() - lastSync < 1500) return null;
+    syncing = syncTranscripts(transcriptState, {
+      dir: transcriptDir,
+      days: transcriptDays,
+      emit: async (spans) => ingestSpans(upsert, pricing, spans),
+    })
+      .catch((e) => console.error('[transcripts]', e.message))
+      .finally(() => {
+        lastSync = Date.now();
+        syncing = null;
+      });
+    return syncing;
+  };
+
   const api = express.Router();
   api.use(requireKey(dashboardKey));
+  api.use(async (req, res, next) => {
+    await refreshTranscripts();
+    next();
+  });
   api.get('/overview', (req, res) => res.json(overview(db, parseRange(req.query))));
   api.get('/projects', (req, res) => res.json(listProjects(db)));
   api.get('/sessions', (req, res) => {

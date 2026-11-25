@@ -1,0 +1,13 @@
+# Local use without a domain or HTTPS: http://localhost:4318
+services:
+  monitor:
+    build: .
+    ports:
+      - "4318:4318"
+    env_file: .env
+    volumes:
+      - monitor-data:/data
+    restart: unless-stopped
+
+volumes:
+  monitor-data:

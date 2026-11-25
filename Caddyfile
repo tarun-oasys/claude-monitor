@@ -1,0 +1,5 @@
+# Automatic HTTPS (Let's Encrypt). DOMAIN comes from .env and must have a DNS A record pointing at this VM.
+{$DOMAIN} {
+	encode gzip
+	reverse_proxy monitor:4318
+}

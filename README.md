@@ -68,3 +68,13 @@ export OTEL_RESOURCE_ATTRIBUTES="project=my-repo"     # optional; shows in the P
 Limits compared with the plugin: no content capture beyond what Claude Code itself logs, project is `unknown` unless set via `OTEL_RESOURCE_ATTRIBUTES`, and the user is `user.email` or `user.id` from the events. Do not run both the plugin and OTLP for the same sessions: they use different span ids, so usage would be counted twice.
 # claude-monitor
 # claude-monitor
+
+## Local transcripts (no hooks, no OTLP)
+
+`IMPORT_TRANSCRIPTS=1` makes the server import your local Claude Code transcripts (`~/.claude/projects/**/*.jsonl`) every time the dashboard requests data, so refreshing the page shows new sessions. Only changed files are re-read, and requests within ~1.5s share one pass.
+
+```bash
+IMPORT_TRANSCRIPTS=1 API_KEY=dev-key npm start     # TRANSCRIPT_DIR and TRANSCRIPT_DAYS (default 30) are optional
+```
+
+Cost is the per-model session total Claude Code records in each transcript, split across that model's calls; calls from sessions with no recorded total are $0 until the model has an entry in `pricing.json`. This only works when the server runs on the same machine as the transcripts. `scripts/import-transcripts.js` does the same over HTTP for a remote server.

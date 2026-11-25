@@ -1,3 +1,4 @@
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createApp } from './app.js';
@@ -14,12 +15,17 @@ const retentionDays = Number(process.env.RETENTION_DAYS) || 0;
 if (!ingestKey) console.warn('[warn] API_KEY is not set: /api/ingest accepts unauthenticated writes. Set it outside local development.');
 if (!dashboardKey) console.warn('[warn] DASHBOARD_KEY is not set: the dashboard API is readable without authentication.');
 
+const transcriptDir =
+  process.env.IMPORT_TRANSCRIPTS === '1' ? process.env.TRANSCRIPT_DIR || path.join(os.homedir(), '.claude', 'projects') : '';
+
 const db = openDb();
 const app = createApp({
   db,
   pricing: loadPricing(),
   ingestKey,
   dashboardKey,
+  transcriptDir,
+  transcriptDays: Number(process.env.TRANSCRIPT_DAYS) || 30,
   staticDir: process.env.STATIC_DIR || path.resolve(here, '../dashboard/dist'),
 });
 
@@ -34,6 +40,7 @@ if (retentionDays > 0) {
   purgeTimer.unref();
 }
 
+if (transcriptDir) console.log(`importing local Claude Code transcripts from ${transcriptDir} on every dashboard load`);
 const server = app.listen(port, host, () => console.log(`claude-monitor listening on http://${host}:${port}`));
 
 function shutdown() {

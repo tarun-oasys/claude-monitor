@@ -1,12 +1,26 @@
 services:
   monitor:
     build: .
-    ports:
-      - "4318:4318"
     env_file: .env
     volumes:
       - monitor-data:/data
     restart: unless-stopped
+    # Reachable only through Caddy. For local use without a domain, run `docker compose -f docker-compose.local.yml up -d`.
+
+  caddy:
+    image: caddy:2
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - DOMAIN=${DOMAIN:?set DOMAIN in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+    depends_on:
+      - monitor
+    restart: unless-stopped
 
 volumes:
   monitor-data:
+  caddy-data:

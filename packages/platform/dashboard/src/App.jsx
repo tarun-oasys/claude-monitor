@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { getKey, setKey, UnauthorizedError } from './api.js';
-import { useApi, useRoute } from './hooks.js';
+import { REFRESH_MS, RefreshProvider, useApi, useRefreshTick, useRoute } from './hooks.js';
 import Overview from './pages/Overview.jsx';
 import Sessions from './pages/Sessions.jsx';
 import SessionDetail from './pages/SessionDetail.jsx';
@@ -34,6 +34,7 @@ function KeyPrompt({ onSave }) {
 
 export default function App() {
   const route = useRoute();
+  const tick = useRefreshTick();
   const [days, setDays] = useState(30);
   const [project, setProject] = useState('');
   const [authTick, setAuthTick] = useState(0);
@@ -47,6 +48,7 @@ export default function App() {
   const [page, id] = route;
 
   return (
+    <RefreshProvider value={tick}>
     <div className="app">
       <header className="topbar">
         <a className="brand" href="#/">Claude Monitor</a>
@@ -55,6 +57,7 @@ export default function App() {
           <a href="#/sessions" className={page === 'sessions' ? 'active' : ''}>Sessions</a>
         </nav>
         <div className="filters">
+          <span className="muted small" title="Data reloads automatically">Auto-refresh {REFRESH_MS / 1000}s</span>
           <select value={project} onChange={(e) => setProject(e.target.value)} aria-label="Project">
             <option value="">All projects</option>
             {(projects.data || []).map((p) => (
@@ -80,5 +83,6 @@ export default function App() {
         )}
       </main>
     </div>
+    </RefreshProvider>
   );
 }
